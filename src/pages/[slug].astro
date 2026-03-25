@@ -1,0 +1,309 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import siteData from '../data/site.json';
+import tools from '../data/tools.json';
+import fs from 'node:fs';
+import path from 'node:path';
+
+export function getStaticPaths() {
+  // Read all .md files from src/content/
+  const contentDir = path.join(process.cwd(), 'src', 'content');
+  let files: string[] = [];
+  try {
+    files = fs.readdirSync(contentDir).filter((f: string) => f.endsWith('.md'));
+  } catch {
+    files = [];
+  }
+
+  return files.map((file: string) => {
+    const slug = file.replace('.md', '');
+    const raw = fs.readFileSync(path.join(contentDir, file), 'utf-8');
+
+    // Parse simple frontmatter
+    const fmMatch = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+    let frontmatter: Record<string, string> = {};
+    let body = raw;
+
+    if (fmMatch) {
+      const fmLines = fmMatch[1].split('\n');
+      for (const line of fmLines) {
+        const idx = line.indexOf(':');
+        if (idx > 0) {
+          const key = line.slice(0, idx).trim();
+          const val = line.slice(idx + 1).trim().replace(/^["']|["']$/g, '');
+          frontmatter[key] = val;
+        }
+      }
+      body = fmMatch[2];
+    }
+
+    return {
+      params: { slug },
+      props: { frontmatter, body, slug },
+    };
+  });
+}
+
+const { frontmatter, body, slug } = Astro.props;
+
+// Find matching tool data if it exists
+const tool = tools.find((t) => t.slug === slug);
+
+const pageTitle = frontmatter.title || tool?.name || slug;
+const pageDescription = frontmatter.description || tool?.description || '';
+
+// Build schema.org Review structured data for tool pages
+const schema = tool
+  ? {
+      "@context": "https://schema.org",
+      "@type": "Review",
+      "name": `${tool.name} Review`,
+      "reviewBody": pageDescription,
+      "itemReviewed": {
+        "@type": "SoftwareApplication",
+        "name": tool.name,
+        "applicationCategory": siteData.niche,
+      },
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": tool.rating,
+        "bestRating": 5,
+        "worstRating": 1,
+      },
+      "author": {
+        "@type": "Organization",
+        "name": siteData.name,
+      },
+    }
+  : undefined;
+
+// Convert markdown to basic HTML
+function markdownToHtml(md: string): string {
+  let html = md
+    // Headings
+    .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+    // Bold and italic
+    .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    // Links
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+    // Unordered lists
+    .replace(/^- (.+)$/gm, '<li>$1</li>')
+    // Paragraphs (lines not already wrapped)
+    .split('\n\n')
+    .map((block) => {
+      const trimmed = block.trim();
+      if (!trimmed) return '';
+      if (trimmed.startsWith('<h') || trimmed.startsWith('<li')) return trimmed;
+      return `<p>${trimmed}</p>`;
+    })
+    .join('\n');
+
+  // Wrap consecutive <li> in <ul>
+  html = html.replace(/((<li>.*?<\/li>\n?)+)/g, '<ul>$1</ul>');
+
+  return html;
+}
+
+const contentHtml = markdownToHtml(body);
+---
+
+<BaseLayout title={`${pageTitle} — ${siteData.name}`} description={pageDescription} schema={schema}>
+  <article class="content-page">
+    <div class="disclosure">
+      This page may contain affiliate links. If you make a purchase through these links,
+      we may earn a commission at no extra cost to you.
+      <a href="/about">Learn more about our methodology.</a>
+    </div>
+
+    <h1>{pageTitle}</h1>
+
+    {tool && (
+      <div class="tool-meta">
+        <span class="rating">
+          {'★'.repeat(Math.floor(tool.rating))}{'☆'.repeat(5 - Math.floor(tool.rating))}
+          <span class="rating-num">{tool.rating}/5</span>
+        </span>
+        {tool.affiliate_url && (
+          <a
+            href={tool.affiliate_url}
+            class="btn-cta"
+            target="_blank"
+            rel="noopener noreferrer nofollow sponsored"
+          >
+            Try {tool.name} &rarr;
+          </a>
+        )}
+      </div>
+    )}
+
+    <div class="prose" set:html={contentHtml} />
+
+    {tool && (tool.pros?.length > 0 || tool.cons?.length > 0) && (
+      <div class="pros-cons-section">
+        <h2>Pros and Cons</h2>
+        <div class="pros-cons-grid">
+          {tool.pros && tool.pros.length > 0 && (
+            <div class="pros-box">
+              <h3>Pros</h3>
+              <ul>
+                {tool.pros.map((p) => <li>{p}</li>)}
+              </ul>
+            </div>
+          )}
+          {tool.cons && tool.cons.length > 0 && (
+            <div class="cons-box">
+              <h3>Cons</h3>
+              <ul>
+                {tool.cons.map((c) => <li>{c}</li>)}
+              </ul>
+            </div>
+          )}
+        </div>
+      </div>
+    )}
+
+    <nav class="page-nav">
+      <a href="/">&larr; Back to all tools</a>
+    </nav>
+  </article>
+</BaseLayout>
+
+<style>
+  .content-page {
+    max-width: 780px;
+    margin: 0 auto;
+  }
+
+  .disclosure {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem;
+    font-size: 0.82rem;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+    margin-bottom: 2rem;
+  }
+
+  .tool-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .rating {
+    color: var(--color-accent);
+    font-size: 1.1rem;
+  }
+
+  .rating-num {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    margin-left: 0.3rem;
+  }
+
+  .btn-cta {
+    display: inline-block;
+    padding: 0.5rem 1.25rem;
+    background-color: var(--color-primary);
+    color: #fff;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+  }
+
+  .btn-cta:hover {
+    background-color: var(--color-primary-hover);
+    color: #fff;
+    text-decoration: none;
+  }
+
+  .prose :global(h2) {
+    margin-top: 2rem;
+  }
+
+  .prose :global(h3) {
+    margin-top: 1.5rem;
+  }
+
+  .prose :global(ul) {
+    margin-bottom: 1rem;
+  }
+
+  .prose :global(a) {
+    color: var(--color-primary);
+  }
+
+  .pros-cons-section {
+    margin-top: 2.5rem;
+  }
+
+  .pros-cons-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+
+  @media (max-width: 560px) {
+    .pros-cons-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .pros-box, .cons-box {
+    padding: 1.25rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--color-border);
+  }
+
+  .pros-box {
+    background-color: color-mix(in srgb, var(--color-success) 5%, var(--color-bg));
+  }
+
+  .cons-box {
+    background-color: color-mix(in srgb, var(--color-danger) 5%, var(--color-bg));
+  }
+
+  .pros-box h3 { color: var(--color-success); margin-top: 0; font-size: 1rem; }
+  .cons-box h3 { color: var(--color-danger); margin-top: 0; font-size: 1rem; }
+
+  .pros-box ul, .cons-box ul {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0;
+  }
+
+  .pros-box li, .cons-box li {
+    font-size: 0.9rem;
+    padding: 0.2rem 0;
+    color: var(--color-text-secondary);
+  }
+
+  .pros-box li::before {
+    content: '+ ';
+    color: var(--color-success);
+    font-weight: 700;
+  }
+
+  .cons-box li::before {
+    content: '- ';
+    color: var(--color-danger);
+    font-weight: 700;
+  }
+
+  .page-nav {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+  }
+</style>
