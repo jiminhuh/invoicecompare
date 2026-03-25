@@ -3,7 +3,7 @@ import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
   output: 'static',
-  site: 'https://example.com', // Agent replaces with actual domain
+  site: 'https://invoicecompare.vercel.app',
   integrations: [sitemap()],
   build: {
     format: 'directory',
