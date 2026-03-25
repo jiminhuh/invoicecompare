@@ -1,32 +1,32 @@
 [
   {
     "slug": "freshbooks",
-    "url": "https://www.freshbooks.com",
+    "url": "https://www.amazon.com/s?k=freshbooks+accounting+software&tag=invoicerank20-20",
     "tool": "FreshBooks"
   },
   {
     "slug": "quickbooks",
-    "url": "https://quickbooks.intuit.com",
+    "url": "https://www.amazon.com/s?k=quickbooks+software&tag=invoicerank20-20",
     "tool": "QuickBooks"
   },
   {
     "slug": "zoho-invoice",
-    "url": "https://www.zoho.com/invoice/",
+    "url": "https://www.amazon.com/s?k=zoho+accounting&tag=invoicerank20-20",
     "tool": "Zoho Invoice"
   },
   {
     "slug": "wave",
-    "url": "https://www.waveapps.com",
+    "url": "https://www.amazon.com/s?k=wave+accounting+software&tag=invoicerank20-20",
     "tool": "Wave"
   },
   {
     "slug": "square-invoices",
-    "url": "https://squareup.com/invoices",
+    "url": "https://www.amazon.com/s?k=square+reader+pos&tag=invoicerank20-20",
     "tool": "Square Invoices"
   },
   {
     "slug": "invoice-ninja",
-    "url": "https://invoiceninja.com",
+    "url": "https://www.amazon.com/s?k=invoicing+software+small+business&tag=invoicerank20-20",
     "tool": "Invoice Ninja"
   }
 ]
