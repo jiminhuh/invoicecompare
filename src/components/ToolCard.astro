@@ -1,0 +1,211 @@
+---
+interface Props {
+  name: string;
+  slug: string;
+  description: string;
+  rating: number;
+  pros?: string[];
+  cons?: string[];
+  affiliate_url?: string;
+}
+
+const { name, slug, description, rating, pros = [], cons = [], affiliate_url } = Astro.props;
+
+function renderStars(rating: number): string {
+  const full = Math.floor(rating);
+  const half = rating % 1 >= 0.5 ? 1 : 0;
+  const empty = 5 - full - half;
+  return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty);
+}
+---
+
+<article class="tool-card">
+  <div class="card-header">
+    <h3 class="card-title">
+      <a href={`/${slug}`}>{name}</a>
+    </h3>
+    <div class="card-rating">
+      <span class="stars">{renderStars(rating)}</span>
+      <span class="rating-num">{rating}/5</span>
+    </div>
+  </div>
+  <p class="card-desc">{description}</p>
+  {(pros.length > 0 || cons.length > 0) && (
+    <div class="card-pros-cons">
+      {pros.length > 0 && (
+        <div class="pros">
+          <span class="label label-pro">Pros</span>
+          <ul>
+            {pros.map((p) => <li>{p}</li>)}
+          </ul>
+        </div>
+      )}
+      {cons.length > 0 && (
+        <div class="cons">
+          <span class="label label-con">Cons</span>
+          <ul>
+            {cons.map((c) => <li>{c}</li>)}
+          </ul>
+        </div>
+      )}
+    </div>
+  )}
+  <div class="card-actions">
+    <a href={`/${slug}`} class="btn-secondary">Read Review</a>
+    {affiliate_url && (
+      <a
+        href={affiliate_url}
+        class="btn-primary"
+        target="_blank"
+        rel="noopener noreferrer nofollow sponsored"
+      >
+        Visit Site &rarr;
+      </a>
+    )}
+  </div>
+</article>
+
+<style>
+  .tool-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    background-color: var(--color-bg);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.15s ease;
+  }
+
+  .tool-card:hover {
+    box-shadow: var(--shadow-md);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .card-title {
+    margin: 0;
+    font-size: 1.15rem;
+  }
+
+  .card-title a {
+    color: var(--color-text);
+  }
+
+  .card-title a:hover {
+    color: var(--color-primary);
+  }
+
+  .card-rating {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .stars {
+    color: var(--color-accent);
+  }
+
+  .rating-num {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    margin-left: 0.3rem;
+  }
+
+  .card-desc {
+    font-size: 0.95rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 1rem;
+  }
+
+  .card-pros-cons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 480px) {
+    .card-pros-cons {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: inline-block;
+    margin-bottom: 0.3rem;
+  }
+
+  .label-pro { color: var(--color-success); }
+  .label-con { color: var(--color-danger); }
+
+  .card-pros-cons ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .card-pros-cons li {
+    font-size: 0.85rem;
+    padding: 0.15rem 0;
+    color: var(--color-text-secondary);
+  }
+
+  .pros li::before {
+    content: '+ ';
+    color: var(--color-success);
+    font-weight: 700;
+  }
+
+  .cons li::before {
+    content: '- ';
+    color: var(--color-danger);
+    font-weight: 700;
+  }
+
+  .card-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    display: inline-block;
+    padding: 0.5rem 1.15rem;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+  }
+
+  .btn-primary {
+    background-color: var(--color-primary);
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background-color: var(--color-primary-hover);
+    color: #fff;
+    text-decoration: none;
+  }
+
+  .btn-secondary {
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    background-color: transparent;
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--color-surface);
+    text-decoration: none;
+  }
+</style>
