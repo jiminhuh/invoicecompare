@@ -2,97 +2,121 @@
   {
     "name": "FreshBooks",
     "slug": "freshbooks-review",
-    "description": "Best for freelancers and service businesses",
+    "description": "Cloud accounting built for freelancers and service businesses",
+    "summary": "If you are a freelancer or consultant who wants beautiful invoices and dead-simple time tracking without learning accounting, FreshBooks is your best bet.",
+    "website": "freshbooks.com",
     "rating": 4.5,
     "pros": [
-      "Easy to use",
-      "Great time tracking",
-      "Excellent mobile app"
+      "Gorgeous, intuitive interface",
+      "Built-in time tracking",
+      "Excellent mobile app",
+      "Award-winning support"
     ],
     "cons": [
-      "Limited reporting",
-      "Gets expensive at scale"
+      "Gets expensive past 5 clients",
+      "Limited reporting vs QuickBooks",
+      "No inventory management"
     ],
-    "affiliate_url": "https://example.com/go/freshbooks"
+    "affiliate_url": "https://www.freshbooks.com"
   },
   {
     "name": "QuickBooks",
     "slug": "quickbooks-review",
-    "description": "Best overall for small businesses",
+    "description": "The industry standard for small business accounting and invoicing",
+    "summary": "If you need serious accounting alongside invoicing \u2014 payroll, inventory, tax prep \u2014 QuickBooks is the safe choice. It does everything, even if the learning curve is real.",
+    "website": "quickbooks.intuit.com",
     "rating": 4.3,
     "pros": [
-      "Comprehensive features",
-      "Huge integration ecosystem",
-      "Strong reporting"
+      "Most comprehensive feature set",
+      "Massive integration ecosystem (750+)",
+      "Strong reporting and tax tools",
+      "Payroll add-on available"
     ],
     "cons": [
       "Steep learning curve",
-      "Customer support issues"
+      "Customer support has declined",
+      "Price increases after first year"
     ],
-    "affiliate_url": "https://example.com/go/quickbooks"
+    "affiliate_url": "https://quickbooks.intuit.com"
   },
   {
     "name": "Zoho Invoice",
     "slug": "zoho-invoice-review",
-    "description": "Best free invoicing software",
+    "description": "Feature-rich free invoicing within the Zoho ecosystem",
+    "summary": "If you already use Zoho products or want genuinely free invoicing with automation features, Zoho Invoice punches way above its price tag (which is zero).",
+    "website": "zoho.com",
     "rating": 4.2,
     "pros": [
-      "Generous free plan",
-      "Part of Zoho ecosystem",
-      "Good automation"
+      "Completely free for up to 1000 invoices/year",
+      "Excellent automation workflows",
+      "Deep Zoho ecosystem integration",
+      "Multi-currency support"
     ],
     "cons": [
-      "UI feels dated",
-      "Limited integrations outside Zoho"
+      "UI feels dated compared to FreshBooks",
+      "Limited integrations outside Zoho",
+      "Steeper setup than simpler tools"
     ],
-    "affiliate_url": "https://example.com/go/zoho-invoice"
+    "affiliate_url": "https://www.zoho.com/invoice/"
   },
   {
     "name": "Wave",
     "slug": "wave-review",
-    "description": "Best completely free option",
+    "description": "100% free accounting and invoicing for small businesses",
+    "summary": "If you are bootstrapping and need professional invoicing without spending a dollar, Wave is the real deal \u2014 free forever, no catch.",
+    "website": "waveapps.com",
     "rating": 4.0,
     "pros": [
-      "100% free invoicing",
-      "Clean interface",
-      "Receipt scanning"
+      "Completely free accounting + invoicing",
+      "Clean, modern interface",
+      "Receipt scanning included",
+      "No user limits"
     ],
     "cons": [
-      "Limited support",
-      "No inventory tracking"
+      "Limited customer support",
+      "No inventory tracking",
+      "Payment processing fees apply"
     ],
-    "affiliate_url": "https://example.com/go/wave"
+    "affiliate_url": "https://www.waveapps.com"
   },
   {
     "name": "Square Invoices",
     "slug": "square-invoices-review",
-    "description": "Best for in-person + online businesses",
+    "description": "Free invoicing that connects seamlessly to Square POS",
+    "summary": "If you sell in-person AND online and want one system for everything \u2014 POS, invoicing, payments \u2014 Square ties it all together.",
+    "website": "squareup.com",
     "rating": 4.1,
     "pros": [
       "Free to send invoices",
       "Seamless POS integration",
-      "Fast deposits"
+      "Fast next-day deposits",
+      "Simple recurring invoices"
     ],
     "cons": [
-      "Higher payment processing fees",
-      "Limited customization"
+      "Higher payment processing fees (2.9% + 30c)",
+      "Limited customization",
+      "Basic reporting"
     ],
-    "affiliate_url": "https://example.com/go/square-invoices"
+    "affiliate_url": "https://squareup.com/invoices"
   },
   {
     "name": "Invoice Ninja",
     "slug": "invoice-ninja-review",
-    "description": "Best open-source option",
+    "description": "Open-source invoicing with a self-hosting option",
+    "summary": "If you want full control over your invoicing data with the option to self-host, Invoice Ninja is the developer-friendly choice.",
+    "website": "invoiceninja.com",
     "rating": 3.9,
     "pros": [
-      "Open source",
-      "Self-hosting option",
-      "Very affordable"
+      "Open source and transparent",
+      "Self-hosting option available",
+      "Very affordable Pro plan",
+      "Highly customizable"
     ],
     "cons": [
-      "Less polished UI",
-      "Smaller user community"
+      "Less polished UI than competitors",
+      "Smaller user community",
+      "Self-hosting requires technical skill"
     ],
-    "affiliate_url": "https://example.com/go/invoice-ninja"
+    "affiliate_url": "https://invoiceninja.com"
   }
 ]
