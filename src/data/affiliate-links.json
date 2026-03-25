@@ -1,0 +1,32 @@
+[
+  {
+    "slug": "freshbooks",
+    "url": "https://www.freshbooks.com",
+    "tool": "FreshBooks"
+  },
+  {
+    "slug": "quickbooks",
+    "url": "https://quickbooks.intuit.com",
+    "tool": "QuickBooks"
+  },
+  {
+    "slug": "zoho-invoice",
+    "url": "https://www.zoho.com/invoice/",
+    "tool": "Zoho Invoice"
+  },
+  {
+    "slug": "wave",
+    "url": "https://www.waveapps.com",
+    "tool": "Wave"
+  },
+  {
+    "slug": "square-invoices",
+    "url": "https://squareup.com/invoices",
+    "tool": "Square Invoices"
+  },
+  {
+    "slug": "invoice-ninja",
+    "url": "https://invoiceninja.com",
+    "tool": "Invoice Ninja"
+  }
+]
