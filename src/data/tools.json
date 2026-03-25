@@ -1,0 +1,98 @@
+[
+  {
+    "name": "FreshBooks",
+    "slug": "freshbooks-review",
+    "description": "Best for freelancers and service businesses",
+    "rating": 4.5,
+    "pros": [
+      "Easy to use",
+      "Great time tracking",
+      "Excellent mobile app"
+    ],
+    "cons": [
+      "Limited reporting",
+      "Gets expensive at scale"
+    ],
+    "affiliate_url": "https://example.com/go/freshbooks"
+  },
+  {
+    "name": "QuickBooks",
+    "slug": "quickbooks-review",
+    "description": "Best overall for small businesses",
+    "rating": 4.3,
+    "pros": [
+      "Comprehensive features",
+      "Huge integration ecosystem",
+      "Strong reporting"
+    ],
+    "cons": [
+      "Steep learning curve",
+      "Customer support issues"
+    ],
+    "affiliate_url": "https://example.com/go/quickbooks"
+  },
+  {
+    "name": "Zoho Invoice",
+    "slug": "zoho-invoice-review",
+    "description": "Best free invoicing software",
+    "rating": 4.2,
+    "pros": [
+      "Generous free plan",
+      "Part of Zoho ecosystem",
+      "Good automation"
+    ],
+    "cons": [
+      "UI feels dated",
+      "Limited integrations outside Zoho"
+    ],
+    "affiliate_url": "https://example.com/go/zoho-invoice"
+  },
+  {
+    "name": "Wave",
+    "slug": "wave-review",
+    "description": "Best completely free option",
+    "rating": 4.0,
+    "pros": [
+      "100% free invoicing",
+      "Clean interface",
+      "Receipt scanning"
+    ],
+    "cons": [
+      "Limited support",
+      "No inventory tracking"
+    ],
+    "affiliate_url": "https://example.com/go/wave"
+  },
+  {
+    "name": "Square Invoices",
+    "slug": "square-invoices-review",
+    "description": "Best for in-person + online businesses",
+    "rating": 4.1,
+    "pros": [
+      "Free to send invoices",
+      "Seamless POS integration",
+      "Fast deposits"
+    ],
+    "cons": [
+      "Higher payment processing fees",
+      "Limited customization"
+    ],
+    "affiliate_url": "https://example.com/go/square-invoices"
+  },
+  {
+    "name": "Invoice Ninja",
+    "slug": "invoice-ninja-review",
+    "description": "Best open-source option",
+    "rating": 3.9,
+    "pros": [
+      "Open source",
+      "Self-hosting option",
+      "Very affordable"
+    ],
+    "cons": [
+      "Less polished UI",
+      "Smaller user community"
+    ],
+    "affiliate_url": "https://example.com/go/invoice-ninja"
+  }
+]
