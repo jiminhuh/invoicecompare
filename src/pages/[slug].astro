@@ -77,36 +77,147 @@ const schema = tool
     }
   : undefined;
 
-// Convert markdown to basic HTML
+const ratingPercent = tool ? (tool.rating / 5) * 100 : 0;
+const faviconUrl = tool?.website ? `https://www.google.com/s2/favicons?domain=${tool.website}&sz=64` : '';
+
+// Convert markdown to basic HTML with table support
 function markdownToHtml(md: string): string {
-  let html = md
+  const lines = md.split('\n');
+  const outputBlocks: string[] = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // Detect markdown table (lines with | characters)
+    if (line.trim().startsWith('|') && line.trim().endsWith('|')) {
+      const tableLines: string[] = [];
+      while (i < lines.length && lines[i].trim().startsWith('|') && lines[i].trim().endsWith('|')) {
+        tableLines.push(lines[i].trim());
+        i++;
+      }
+
+      if (tableLines.length >= 2) {
+        let tableHtml = '<div class="table-responsive"><table>';
+
+        // Header row
+        const headerCells = tableLines[0].split('|').filter((c) => c.trim() !== '');
+        tableHtml += '<thead><tr>';
+        for (const cell of headerCells) {
+          tableHtml += `<th>${processInline(cell.trim())}</th>`;
+        }
+        tableHtml += '</tr></thead>';
+
+        // Skip separator row (the --- row)
+        const startRow = tableLines[1].includes('---') ? 2 : 1;
+
+        tableHtml += '<tbody>';
+        for (let r = startRow; r < tableLines.length; r++) {
+          const cells = tableLines[r].split('|').filter((c) => c.trim() !== '');
+          tableHtml += '<tr>';
+          for (const cell of cells) {
+            tableHtml += `<td>${processInline(cell.trim())}</td>`;
+          }
+          tableHtml += '</tr>';
+        }
+        tableHtml += '</tbody></table></div>';
+        outputBlocks.push(tableHtml);
+      }
+      continue;
+    }
+
+    // Horizontal rule
+    if (/^---+$/.test(line.trim()) || /^\*\*\*+$/.test(line.trim())) {
+      outputBlocks.push('<hr>');
+      i++;
+      continue;
+    }
+
     // Headings
-    .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
-    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-    // Bold and italic
+    const h4Match = line.match(/^#### (.+)$/);
+    if (h4Match) { outputBlocks.push(`<h4>${processInline(h4Match[1])}</h4>`); i++; continue; }
+    const h3Match = line.match(/^### (.+)$/);
+    if (h3Match) { outputBlocks.push(`<h3>${processInline(h3Match[1])}</h3>`); i++; continue; }
+    const h2Match = line.match(/^## (.+)$/);
+    if (h2Match) { outputBlocks.push(`<h2>${processInline(h2Match[1])}</h2>`); i++; continue; }
+    const h1Match = line.match(/^# (.+)$/);
+    if (h1Match) { outputBlocks.push(`<h1>${processInline(h1Match[1])}</h1>`); i++; continue; }
+
+    // Unordered list
+    if (/^[-*] /.test(line.trim())) {
+      let listItems = '';
+      while (i < lines.length && /^[-*] /.test(lines[i].trim())) {
+        listItems += `<li>${processInline(lines[i].trim().replace(/^[-*] /, ''))}</li>`;
+        i++;
+      }
+      outputBlocks.push(`<ul>${listItems}</ul>`);
+      continue;
+    }
+
+    // Ordered list
+    if (/^\d+\. /.test(line.trim())) {
+      let listItems = '';
+      while (i < lines.length && /^\d+\. /.test(lines[i].trim())) {
+        listItems += `<li>${processInline(lines[i].trim().replace(/^\d+\. /, ''))}</li>`;
+        i++;
+      }
+      outputBlocks.push(`<ol>${listItems}</ol>`);
+      continue;
+    }
+
+    // Blockquote
+    if (line.trim().startsWith('> ')) {
+      let quoteContent = '';
+      while (i < lines.length && lines[i].trim().startsWith('> ')) {
+        quoteContent += lines[i].trim().replace(/^> /, '') + ' ';
+        i++;
+      }
+      outputBlocks.push(`<blockquote><p>${processInline(quoteContent.trim())}</p></blockquote>`);
+      continue;
+    }
+
+    // Empty line
+    if (line.trim() === '') {
+      i++;
+      continue;
+    }
+
+    // Paragraph: collect consecutive non-empty non-special lines
+    let paraContent = '';
+    while (
+      i < lines.length &&
+      lines[i].trim() !== '' &&
+      !lines[i].trim().startsWith('#') &&
+      !lines[i].trim().startsWith('|') &&
+      !/^[-*] /.test(lines[i].trim()) &&
+      !/^\d+\. /.test(lines[i].trim()) &&
+      !lines[i].trim().startsWith('> ') &&
+      !/^---+$/.test(lines[i].trim()) &&
+      !/^\*\*\*+$/.test(lines[i].trim())
+    ) {
+      paraContent += (paraContent ? ' ' : '') + lines[i].trim();
+      i++;
+    }
+    if (paraContent) {
+      outputBlocks.push(`<p>${processInline(paraContent)}</p>`);
+    }
+  }
+
+  return outputBlocks.join('\n');
+}
+
+function processInline(text: string): string {
+  return text
+    // Bold + italic
     .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+    // Bold
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    // Italic
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    // Inline code
+    .replace(/`(.+?)`/g, '<code>$1</code>')
     // Links
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
-    // Unordered lists
-    .replace(/^- (.+)$/gm, '<li>$1</li>')
-    // Paragraphs (lines not already wrapped)
-    .split('\n\n')
-    .map((block) => {
-      const trimmed = block.trim();
-      if (!trimmed) return '';
-      if (trimmed.startsWith('<h') || trimmed.startsWith('<li')) return trimmed;
-      return `<p>${trimmed}</p>`;
-    })
-    .join('\n');
-
-  // Wrap consecutive <li> in <ul>
-  html = html.replace(/((<li>.*?<\/li>\n?)+)/g, '<ul>$1</ul>');
-
-  return html;
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
 }
 
 const contentHtml = markdownToHtml(body);
@@ -115,19 +226,37 @@ const contentHtml = markdownToHtml(body);
 <BaseLayout title={`${pageTitle} — ${siteData.name}`} description={pageDescription} schema={schema}>
   <article class="content-page">
     <div class="disclosure">
-      This page may contain affiliate links. If you make a purchase through these links,
-      we may earn a commission at no extra cost to you.
-      <a href="/about">Learn more about our methodology.</a>
+      This page may contain affiliate links. We may earn a commission at no extra cost to you.
+      <a href="/about">Learn more.</a>
     </div>
 
-    <h1>{pageTitle}</h1>
+    <div class="page-title-row">
+      {tool && (
+        <div class="title-logo">
+          {tool.website ? (
+            <img
+              src={faviconUrl}
+              alt={`${tool.name} logo`}
+              width="40"
+              height="40"
+              loading="lazy"
+            />
+          ) : (
+            <div class="logo-fallback">{tool.name.charAt(0)}</div>
+          )}
+        </div>
+      )}
+      <h1>{pageTitle}</h1>
+    </div>
 
     {tool && (
       <div class="tool-meta">
-        <span class="rating">
-          {'★'.repeat(Math.floor(tool.rating))}{'☆'.repeat(5 - Math.floor(tool.rating))}
+        <div class="meta-rating">
+          <div class="rating-bar" title={`${tool.rating} out of 5`}>
+            <div class="rating-bar-fill" style={`width: ${ratingPercent}%`}></div>
+          </div>
           <span class="rating-num">{tool.rating}/5</span>
-        </span>
+        </div>
         {tool.affiliate_url && (
           <a
             href={tool.affiliate_url}
@@ -138,6 +267,12 @@ const contentHtml = markdownToHtml(body);
             Try {tool.name} &rarr;
           </a>
         )}
+      </div>
+    )}
+
+    {tool?.summary && (
+      <div class="page-summary">
+        {tool.summary}
       </div>
     )}
 
@@ -181,61 +316,135 @@ const contentHtml = markdownToHtml(body);
 
   .disclosure {
     background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
     border-radius: var(--radius);
-    padding: 0.75rem 1rem;
-    font-size: 0.82rem;
+    padding: 0.6rem 1rem;
+    font-size: 0.78rem;
     color: var(--color-text-secondary);
     line-height: 1.5;
     margin-bottom: 2rem;
   }
 
-  .tool-meta {
+  .disclosure a {
+    font-weight: 500;
+  }
+
+  .page-title-row {
     display: flex;
     align-items: center;
     gap: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .title-logo {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .title-logo img {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: contain;
+  }
+
+  .logo-fallback {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--color-primary), #6366f1);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .page-title-row h1 {
+    margin: 0;
+  }
+
+  .tool-meta {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
     margin-bottom: 1.5rem;
     flex-wrap: wrap;
   }
 
-  .rating {
-    color: var(--color-accent);
-    font-size: 1.1rem;
+  .meta-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .rating-bar {
+    width: 100px;
+    height: 8px;
+    background-color: var(--color-border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .rating-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--color-accent), #f97316);
   }
 
   .rating-num {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     color: var(--color-text-secondary);
-    margin-left: 0.3rem;
+    font-weight: 700;
   }
 
   .btn-cta {
     display: inline-block;
-    padding: 0.5rem 1.25rem;
+    padding: 0.55rem 1.3rem;
     background-color: var(--color-primary);
     color: #fff;
-    border-radius: var(--radius);
+    border-radius: 8px;
     font-size: 0.9rem;
     font-weight: 600;
     text-decoration: none;
-    transition: background-color 0.15s ease;
+    transition: all 0.2s ease;
   }
 
   .btn-cta:hover {
     background-color: var(--color-primary-hover);
     color: #fff;
     text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
   }
 
+  .page-summary {
+    background-color: var(--color-surface);
+    border-left: 4px solid var(--color-primary);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 1rem 1.25rem;
+    font-size: 0.95rem;
+    color: var(--color-text);
+    font-style: italic;
+    line-height: 1.65;
+    margin-bottom: 2rem;
+  }
+
+  /* Prose content styles */
   .prose :global(h2) {
-    margin-top: 2rem;
+    margin-top: 2.25rem;
   }
 
   .prose :global(h3) {
-    margin-top: 1.5rem;
+    margin-top: 1.75rem;
   }
 
-  .prose :global(ul) {
+  .prose :global(ul),
+  .prose :global(ol) {
     margin-bottom: 1rem;
   }
 
@@ -243,6 +452,35 @@ const contentHtml = markdownToHtml(body);
     color: var(--color-primary);
   }
 
+  .prose :global(hr) {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: 2rem 0;
+  }
+
+  .prose :global(.table-responsive) {
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    border-radius: var(--radius);
+  }
+
+  .prose :global(.table-responsive table) {
+    margin: 0;
+  }
+
+  .prose :global(blockquote) {
+    border-left: 4px solid var(--color-primary);
+    padding: 0.75rem 1rem;
+    margin: 1.25rem 0;
+    background-color: var(--color-surface);
+    border-radius: 0 var(--radius) var(--radius) 0;
+  }
+
+  .prose :global(blockquote p) {
+    margin: 0;
+  }
+
+  /* Pros/Cons section */
   .pros-cons-section {
     margin-top: 2.5rem;
   }
@@ -285,7 +523,7 @@ const contentHtml = markdownToHtml(body);
 
   .pros-box li, .cons-box li {
     font-size: 0.9rem;
-    padding: 0.2rem 0;
+    padding: 0.25rem 0;
     color: var(--color-text-secondary);
   }
 
@@ -305,5 +543,10 @@ const contentHtml = markdownToHtml(body);
     margin-top: 3rem;
     padding-top: 1.5rem;
     border-top: 1px solid var(--color-border);
+  }
+
+  .page-nav a {
+    font-weight: 500;
+    font-size: 0.92rem;
   }
 </style>
