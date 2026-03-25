@@ -1,0 +1,123 @@
+---
+interface Tool {
+  name: string;
+  slug: string;
+  rating: number;
+  description: string;
+  affiliate_url?: string;
+}
+
+interface Props {
+  tools: Tool[];
+}
+
+const { tools } = Astro.props;
+
+function renderStars(rating: number): string {
+  const full = Math.floor(rating);
+  const half = rating % 1 >= 0.5 ? 1 : 0;
+  const empty = 5 - full - half;
+  return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty);
+}
+---
+
+<div class="table-wrapper">
+  <table class="comparison-table">
+    <thead>
+      <tr>
+        <th>Tool</th>
+        <th>Rating</th>
+        <th>Description</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {tools.map((tool) => (
+        <tr>
+          <td class="tool-name">
+            <a href={`/${tool.slug}`}>{tool.name}</a>
+          </td>
+          <td class="tool-rating">
+            <span class="stars" title={`${tool.rating} out of 5`}>
+              {renderStars(tool.rating)}
+            </span>
+            <span class="rating-num">{tool.rating}</span>
+          </td>
+          <td class="tool-desc">{tool.description}</td>
+          <td class="tool-cta">
+            {tool.affiliate_url && (
+              <a
+                href={tool.affiliate_url}
+                class="btn-cta"
+                target="_blank"
+                rel="noopener noreferrer nofollow sponsored"
+              >
+                Visit Site
+              </a>
+            )}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .table-wrapper {
+    overflow-x: auto;
+    margin: 1.5rem 0;
+  }
+
+  .comparison-table {
+    min-width: 600px;
+  }
+
+  .tool-name a {
+    font-weight: 600;
+  }
+
+  .tool-rating {
+    white-space: nowrap;
+  }
+
+  .stars {
+    color: var(--color-accent);
+    font-size: 1rem;
+    letter-spacing: 1px;
+  }
+
+  .rating-num {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    margin-left: 0.4rem;
+  }
+
+  .tool-desc {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    max-width: 320px;
+  }
+
+  .tool-cta {
+    text-align: right;
+  }
+
+  .btn-cta {
+    display: inline-block;
+    padding: 0.4rem 1rem;
+    background-color: var(--color-primary);
+    color: #fff;
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.15s ease;
+  }
+
+  .btn-cta:hover {
+    background-color: var(--color-primary-hover);
+    color: #fff;
+    text-decoration: none;
+  }
+</style>
